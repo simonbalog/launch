@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Launch – živý přenos z kamery</title>
+  <meta name="description" content="Živý přenos z kamery počítače.">
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0a0d12;
+      --panel: #121722;
+      --border: #1f2937;
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --accent: #22d3ee;
+      --live: #ef4444;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      background: radial-gradient(1200px 800px at 50% -20%, #16324a 0%, var(--bg) 55%);
+      color: var(--text);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      min-height: 100%;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      background: rgba(10, 13, 18, .7);
+      backdrop-filter: blur(8px);
+    }
+    header h1 { font-size: 1rem; margin: 0; letter-spacing: .02em; font-weight: 600; }
+    header h1 span { color: var(--accent); }
+    header a { color: var(--muted); text-decoration: none; font-size: .85rem; }
+    header a:hover { color: var(--text); }
+    main {
+      flex: 1;
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: .9rem;
+    }
+    .player {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: #000;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, .5);
+    }
+    video { width: 100%; height: 100%; object-fit: contain; background: #000; display: block; }
+    .overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 1rem;
+      font-size: .95rem;
+      color: var(--muted);
+      background: radial-gradient(circle at center, rgba(18, 23, 34, .85), rgba(0, 0, 0, .92));
+      z-index: 2;
+    }
+    .live {
+      position: absolute;
+      top: .75rem;
+      left: .75rem;
+      z-index: 3;
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      padding: .3rem .6rem;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, .6);
+      border: 1px solid rgba(239, 68, 68, .5);
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .live .dot {
+      width: .5rem;
+      height: .5rem;
+      border-radius: 50%;
+      background: var(--live);
+      box-shadow: 0 0 0 0 rgba(239, 68, 68, .7);
+      animation: pulse 1.6s infinite;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, .6); }
+      70% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: .75rem;
+      color: var(--muted);
+      font-size: .85rem;
+    }
+    .meta .spacer { flex: 1; }
+    .meta .status { color: var(--text); }
+    button {
+      appearance: none;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      color: var(--text);
+      padding: .55rem .9rem;
+      border-radius: 10px;
+      font-size: .85rem;
+      cursor: pointer;
+      transition: border-color .15s, background .15s;
+    }
+    button:hover { border-color: var(--accent); background: #16202e; }
+    footer {
+      padding: 1rem 1.25rem 1.5rem;
+      text-align: center;
+      color: #64748b;
+      font-size: .78rem;
+    }
+    @media (max-width: 520px) {
+      main { padding: .75rem; }
+      header { padding: .75rem; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1><span>●</span> Launch – živý přenos z kamery</h1>
+    <a href="https://github.com/simonbalog/launch" target="_blank" rel="noopener">GitHub</a>
+  </header>
+
+  <main>
+    <div class="player">
+      <video id="video" muted playsinline controls autoplay></video>
+      <div id="overlay" class="overlay">Připojování…</div>
+      <div id="live" class="live" hidden><span class="dot"></span>Live</div>
+    </div>
+
+    <div class="meta">
+      <span id="status" class="status">Načítám…</span>
+      <span id="updated"></span>
+      <span class="spacer"></span>
+      <button id="reload" type="button">Znovu načíst</button>
+      <button id="fullscreen" type="button">Celá obrazovka</button>
+    </div>
+  </main>
+
+  <footer>Přenos běží z domácího počítače přes Cloudflare tunel. URL se při každém spuštění mění.</footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
+  <script>
+    const video = document.getElementById('video');
+    const overlay = document.getElementById('overlay');
+    const liveEl = document.getElementById('live');
+    const statusEl = document.getElementById('status');
+    const updatedEl = document.getElementById('updated');
+    const reloadBtn = document.getElementById('reload');
+    const fullscreenBtn = document.getElementById('fullscreen');
+
+    let hls = null;
+    let currentUrl = null;
+    let retryTimer = null;
+    let configTimer = null;
+
+    function setOverlay(text, show) {
+      overlay.textContent = text;
+      overlay.style.display = show ? 'flex' : 'none';
+    }
+
+    function setStatus(text) {
+      statusEl.textContent = text;
+    }
+
+    function destroyPlayer() {
+      clearTimeout(retryTimer);
+      if (hls) {
+        hls.destroy();
+        hls = null;
+      }
+      video.removeAttribute('src');
+      video.load();
+      liveEl.hidden = true;
+    }
+
+    async function loadConfig() {
+      try {
+        const res = await fetch('stream.json?t=' + Date.now(), { cache: 'no-store' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return await res.json();
+      } catch (err) {
+        return { url: '', updated: '' };
+      }
+    }
+
+    function scheduleRetry() {
+      clearTimeout(retryTimer);
+      retryTimer = setTimeout(() => refresh(true), 5000);
+    }
+
+    function attach(url) {
+      destroyPlayer();
+      currentUrl = url;
+
+      if (!url) {
+        setOverlay('Stream je offline. Čekám na vysílač…', true);
+        setStatus('Offline – čekám na vysílač');
+        return;
+      }
+
+      const src = url.replace(/\/+$/, '') + '/index.m3u8';
+      setOverlay('Připojování…', true);
+      setStatus('Připojuji…');
+
+      if (window.Hls && window.Hls.isSupported()) {
+        hls = new window.Hls({
+          lowLatencyMode: true,
+          liveSyncDurationCount: 2,
+          backBufferLength: 30,
+          maxLiveSyncPlaybackRate: 1.5,
+          manifestLoadingMaxRetry: 6,
+          fragLoadingMaxRetry: 6
+        });
+        hls.loadSource(src);
+        hls.attachMedia(video);
+        hls.on(window.Hls.Events.MANIFEST_PARSED, () => {
+          video.play().catch(() => {});
+        });
+        hls.on(window.Hls.Events.ERROR, (_event, data) => {
+          if (!data.fatal) return;
+          if (data.type === window.Hls.ErrorTypes.NETWORK_ERROR) {
+            setStatus('Síťová chyba, zkouším znovu…');
+            hls.startLoad();
+          } else if (data.type === window.Hls.ErrorTypes.MEDIA_ERROR) {
+            hls.recoverMediaError();
+          } else {
+            setStatus('Stream spadl, obnovuji…');
+            scheduleRetry();
+          }
+        });
+      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = src;
+        video.play().catch(() => {});
+      } else {
+        setOverlay('Tento prohlížeč neumí přehrávat HLS.', true);
+        setStatus('Nepodporovaný prohlížeč');
+      }
+    }
+
+    video.addEventListener('playing', () => {
+      setOverlay('', false);
+      liveEl.hidden = false;
+      setStatus('Přenos běží');
+    });
+
+    video.addEventListener('waiting', () => {
+      if (currentUrl) setStatus('Načítání…');
+    });
+
+    video.addEventListener('error', () => {
+      if (currentUrl) {
+        setStatus('Chyba přehrávání, obnovuji…');
+        scheduleRetry();
+      }
+    });
+
+    async function refresh(force) {
+      const cfg = await loadConfig();
+      updatedEl.textContent = cfg.updated
+        ? 'Aktualizováno: ' + new Date(cfg.updated).toLocaleString('cs-CZ')
+        : '';
+
+      if (force || cfg.url !== currentUrl) {
+        attach(cfg.url);
+      }
+    }
+
+    reloadBtn.addEventListener('click', () => refresh(true));
+    fullscreenBtn.addEventListener('click', () => {
+      if (video.requestFullscreen) video.requestFullscreen();
+    });
+
+    refresh(true);
+
+    configTimer = setInterval(() => {
+      if (document.visibilityState === 'visible') refresh(false);
+    }, 20000);
+  </script>
+</body>
+</html>

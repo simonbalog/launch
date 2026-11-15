@@ -1,0 +1,7 @@
+bin/
+run/
+logs/
+stream/hls/
+*.log
+__pycache__/
+*.pyc
