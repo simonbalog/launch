@@ -14,10 +14,11 @@ fi
 : "${VIDEO_DEVICE:=/dev/video0}"
 : "${VIDEO_SIZE:=1280x720}"
 : "${FRAMERATE:=30}"
+: "${GOP:=15}"
 : "${BITRATE:=1500k}"
 : "${BUFSIZE:=3000k}"
-: "${HLS_TIME:=1}"
-: "${HLS_LIST_SIZE:=4}"
+: "${HLS_TIME:=0.5}"
+: "${HLS_LIST_SIZE:=6}"
 : "${PORT:=8080}"
 : "${GIT_BRANCH:=main}"
 : "${PAGES_DIR:=docs}"
@@ -34,13 +35,16 @@ fi
 
 echo "[1/4] Spouštím ffmpeg z $VIDEO_DEVICE..."
 bin/ffmpeg -hide_banner -loglevel warning \
+  -fflags nobuffer \
   -f v4l2 -framerate "$FRAMERATE" -video_size "$VIDEO_SIZE" -i "$VIDEO_DEVICE" \
   -an -c:v libx264 -preset veryfast -tune zerolatency -profile:v baseline -pix_fmt yuv420p \
-  -g "$FRAMERATE" -keyint_min "$FRAMERATE" -sc_threshold 0 \
+  -x264-params "rc-lookahead=0:sync-lookahead=0:bframes=0:scenecut=0" \
+  -g "$GOP" -keyint_min "$GOP" -sc_threshold 0 \
   -b:v "$BITRATE" -maxrate "$BITRATE" -bufsize "$BUFSIZE" \
   -force_key_frames "expr:gte(t,n_forced*$HLS_TIME)" \
   -f hls -hls_time "$HLS_TIME" -hls_list_size "$HLS_LIST_SIZE" \
-  -hls_flags delete_segments+append_list+omit_endlist+independent_segments \
+  -hls_flags delete_segments+append_list+omit_endlist+independent_segments+program_date_time \
+  -flush_packets 1 \
   -hls_segment_filename "stream/hls/seg_%05d.ts" \
   stream/hls/index.m3u8 \
   >> logs/ffmpeg.log 2>&1 &
