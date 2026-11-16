@@ -114,7 +114,7 @@ for ((i=0; i<SEGMENT_WAIT; i++)); do
   fi
   if curl --silent --show-error --fail --max-time 2 "http://127.0.0.1:$PORT/health" -o /dev/null 2>/dev/null \
       && [[ -s stream/hls/index.m3u8 ]] \
-      && grep -Eq '^seg_[0-9]{5}\.ts$' <(sed -n 's|.*/||p' stream/hls/index.m3u8) \
+      && grep -Eq '^seg_[0-9]{5}\.ts$' <(sed -E 's|.*/||' stream/hls/index.m3u8) \
       && compgen -G 'stream/hls/seg_*.ts' >/dev/null; then
     READY=1
     break
