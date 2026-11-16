@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#04060a">
+  <meta name="description" content="Satelitní pohled na místo rampy pro misi Cassiopeia I.">
+  <title>Pohled na rampu — Cassiopeia I</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+      color: #f2f5f8;
+      background: #04060a;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; }
+    main { width: min(1100px, 100%); margin: 0 auto; padding: clamp(1.25rem, 4vw, 3rem); }
+    a { color: #a9c5ff; }
+    header { margin-bottom: 1.5rem; }
+    h1 { margin: .8rem 0; font-size: clamp(1.8rem, 5vw, 3rem); }
+    p { color: #c3ccd8; line-height: 1.65; }
+    .map {
+      width: 100%;
+      height: min(72vh, 720px);
+      min-height: 360px;
+      border: 1px solid rgba(255,255,255,.2);
+      background: #0b1118;
+    }
+    .actions { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem; }
+    .actions a { display: inline-block; padding: .7rem 1rem; border: 1px solid rgba(255,255,255,.25); text-decoration: none; }
+    .actions a:hover { border-color: #8fb4ff; }
+    .note { font-size: .85rem; color: #8a94a6; }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <a href="./">← Cassiopeia I — hlavní stránka</a>
+      <h1>Satelitní pohled na rampu</h1>
+      <p>Mapa zobrazuje místo určené odkazem na Google Maps. Pro změnu měřítka nebo zobrazení okolí použij ovládací prvky mapy.</p>
+    </header>
+
+    <iframe
+      class="map"
+      title="Satelitní mapa místa rampy"
+      src="https://maps.google.com/maps?q=https%3A%2F%2Fmaps.app.goo.gl%2FDHEWCzussfzUmAKJ7&amp;t=k&amp;z=18&amp;output=embed"
+      loading="lazy"
+      allowfullscreen>
+    </iframe>
+
+    <div class="actions">
+      <a href="https://maps.app.goo.gl/DHEWCzussfzUmAKJ7" target="_blank" rel="noopener noreferrer">Otevřít místo v Google Maps</a>
+      <a href="https://maps.app.goo.gl/DHEWCzussfzUmAKJ7" target="_blank" rel="noopener noreferrer">Zobrazit trasu v Google Maps</a>
+    </div>
+    <p class="note">Vložená mapa načítá obsah přímo od Google. Pokud se v některém prohlížeči nezobrazí, otevři místo přímo v Google Maps.</p>
+  </main>
+</body>
+</html>

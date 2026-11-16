@@ -6,747 +6,224 @@
   <title>Cassiopeia I — Mellotech</title>
   <meta name="description" content="Cassiopeia I — první start nosné rakety týmu Mellotech. 21. 11. 2026, 14:00 CET. Živý přenos z rampy.">
   <meta name="theme-color" content="#04060a">
-  <meta property="og:title" content="Cassiopeia I — Mellotech">
-  <meta property="og:description" content="První start nosné rakety Cassiopeia I. 21. 11. 2026, 14:00 CET.">
-  <meta property="og:type" content="website">
-  <meta property="og:image" content="https://simonbalog.github.io/launch/assets/mission-logo.png">
-  <link rel="icon" href="assets/mission-logo.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      color-scheme: dark;
       --bg: #04060a;
-      --bg-2: #080c12;
-      --panel: #0b1118;
-      --line: rgba(255, 255, 255, .10);
-      --line-strong: rgba(255, 255, 255, .18);
+      --bg-2: #0b1118;
+      --line: rgba(255,255,255,0.12);
       --text: #f2f5f8;
       --muted: #8a94a6;
       --body: #c3ccd8;
       --accent: #8fb4ff;
       --live: #ff3b30;
       --ok: #38d39f;
-      --max: 1200px;
+      --max: 1100px;
       --nav-h: 66px;
     }
-
     * { box-sizing: border-box; }
-    html {
-      scroll-behavior: smooth;
-      -webkit-text-size-adjust: 100%;
-    }
+    html { scroll-behavior: smooth; }
     body {
       margin: 0;
       background: var(--bg);
       color: var(--text);
-      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-      font-weight: 400;
+      font-family: Inter, system-ui, -apple-system, 'Segoe UI', sans-serif;
       line-height: 1.6;
-      overflow-x: hidden;
     }
-    img { max-width: 100%; display: block; }
     a { color: inherit; }
-    ::selection { background: rgba(143, 180, 255, .3); }
-
-    h1, h2, h3, .display, .kicker, .eyebrow, .countdown, .btn, .facts .v, .card .v,
-    .timeline .t, .launch-meta strong, .nav-status, .brand-caption {
-      font-family: 'Space Grotesk', 'Inter', sans-serif;
-    }
-
-    /* ---------- starfield ---------- */
+    img { max-width: 100%; display: block; }
     .stars, .stars::after {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
-      content: "";
-    }
-    .stars {
+      position: fixed; inset: 0; pointer-events: none; z-index: 0; content: "";
       background-image:
-        radial-gradient(1px 1px at 12% 22%, rgba(255,255,255,.85), transparent 60%),
+        radial-gradient(1px 1px at 12% 22%, rgba(255,255,255,.8), transparent 60%),
         radial-gradient(1px 1px at 34% 8%, rgba(255,255,255,.55), transparent 60%),
-        radial-gradient(1.5px 1.5px at 58% 17%, rgba(255,255,255,.75), transparent 60%),
+        radial-gradient(1.5px 1.5px at 58% 17%, rgba(255,255,255,.7), transparent 60%),
         radial-gradient(1px 1px at 76% 6%, rgba(255,255,255,.5), transparent 60%),
         radial-gradient(1px 1px at 89% 31%, rgba(255,255,255,.7), transparent 60%),
-        radial-gradient(1px 1px at 6% 58%, rgba(255,255,255,.45), transparent 60%),
-        radial-gradient(1.5px 1.5px at 45% 47%, rgba(255,255,255,.6), transparent 60%),
-        radial-gradient(1px 1px at 68% 63%, rgba(255,255,255,.5), transparent 60%),
-        radial-gradient(1px 1px at 23% 78%, rgba(255,255,255,.4), transparent 60%),
-        radial-gradient(1px 1px at 94% 82%, rgba(255,255,255,.55), transparent 60%);
-      background-size: 640px 640px, 540px 540px, 760px 760px, 700px 700px, 820px 820px,
-                       600px 600px, 900px 900px, 680px 680px, 560px 560px, 780px 780px;
-      opacity: .6;
-      animation: drift 180s linear infinite;
+        radial-gradient(1px 1px at 6% 58%, rgba(255,255,255,.45), transparent 60%);
+      background-size: 640px 640px, 540px 540px, 760px 760px, 700px 700px, 820px 820px, 600px 600px;
+      opacity: .65;
     }
     .stars::after {
       background-image:
         radial-gradient(1px 1px at 18% 35%, rgba(143,180,255,.7), transparent 60%),
         radial-gradient(1px 1px at 52% 72%, rgba(255,255,255,.4), transparent 60%),
-        radial-gradient(1.5px 1.5px at 82% 44%, rgba(143,180,255,.5), transparent 60%),
-        radial-gradient(1px 1px at 37% 88%, rgba(255,255,255,.35), transparent 60%);
-      background-size: 520px 520px, 640px 640px, 580px 580px, 700px 700px;
+        radial-gradient(1.5px 1.5px at 82% 44%, rgba(143,180,255,.5), transparent 60%);
+      background-size: 520px 520px, 640px 640px, 580px 580px;
       opacity: .5;
-      animation: drift 240s linear infinite reverse;
     }
-    @keyframes drift {
-      from { background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0; }
-      to { background-position: 0 -640px, 0 -540px, 0 -760px, 0 -700px, 0 -820px,
-                          0 -600px, 0 -900px, 0 -680px, 0 -560px, 0 -780px; }
-    }
-
-    /* ---------- nav ---------- */
     .nav {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 50;
-      display: flex;
-      align-items: center;
-      gap: 2rem;
-      height: var(--nav-h);
+      position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+      display: flex; align-items: center; gap: 2rem; height: var(--nav-h);
       padding: 0 clamp(1rem, 3vw, 2rem);
-      border-bottom: 1px solid transparent;
-      transition: background .3s ease, border-color .3s ease, backdrop-filter .3s ease;
+      transition: background .3s ease, border-color .3s ease;
     }
     .nav.scrolled {
-      background: rgba(4, 6, 10, .82);
-      border-color: var(--line);
+      background: rgba(4,6,10,.82);
+      border-bottom: 1px solid var(--line);
       backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
     }
     .brand {
-      display: flex;
-      align-items: center;
-      gap: .75rem;
-      text-decoration: none;
+      display: flex; align-items: center; gap: .75rem; text-decoration: none;
       flex-shrink: 0;
     }
     .brand img { height: 30px; width: auto; }
     .brand-caption {
-      font-size: .62rem;
-      letter-spacing: .26em;
-      text-transform: uppercase;
-      color: var(--muted);
-      border-left: 1px solid var(--line-strong);
-      padding-left: .75rem;
-      line-height: 1.2;
+      font-size: .62rem; letter-spacing: .26em; text-transform: uppercase; color: var(--muted);
+      border-left: 1px solid var(--line); padding-left: .75rem; line-height: 1.2;
     }
     .nav nav {
-      display: flex;
-      align-items: center;
-      gap: clamp(1rem, 2.4vw, 2rem);
-      margin-left: auto;
+      display: flex; align-items: center; gap: clamp(1rem, 2.4vw, 2rem); margin-left: auto;
     }
     .nav nav a {
-      font-size: .7rem;
-      letter-spacing: .16em;
-      text-transform: uppercase;
-      text-decoration: none;
-      color: var(--muted);
-      transition: color .2s ease;
+      font-size: .7rem; letter-spacing: .16em; text-transform: uppercase;
+      text-decoration: none; color: var(--muted);
     }
     .nav nav a:hover { color: var(--text); }
     .nav-status {
-      display: inline-flex;
-      align-items: center;
-      gap: .5rem;
-      margin-left: 1rem;
-      padding-left: 1.25rem;
-      border-left: 1px solid var(--line-strong);
-      font-size: .64rem;
-      letter-spacing: .18em;
-      text-transform: uppercase;
-      color: var(--body);
-      white-space: nowrap;
+      display: inline-flex; align-items: center; gap: .5rem; margin-left: 1rem;
+      padding-left: 1.25rem; border-left: 1px solid var(--line); font-size: .64rem;
+      letter-spacing: .18em; text-transform: uppercase; color: var(--body); white-space: nowrap;
     }
     .nav-status .dot {
-      width: .45rem;
-      height: .45rem;
-      border-radius: 50%;
-      background: var(--ok);
+      width: .45rem; height: .45rem; border-radius: 50%; background: var(--ok);
       box-shadow: 0 0 10px rgba(56, 211, 159, .8);
     }
-
-    /* ---------- layout ---------- */
-    .section {
-      position: relative;
-      z-index: 1;
-      width: 100%;
-      max-width: var(--max);
-      margin: 0 auto;
-      padding: clamp(3.5rem, 8vw, 6.5rem) clamp(1.25rem, 4vw, 2rem);
-      scroll-margin-top: calc(var(--nav-h) + 8px);
+    .section, .hero-inner, footer {
+      position: relative; z-index: 1; width: min(var(--max), calc(100% - 2rem)); margin-inline: auto;
     }
-    .section + .section { border-top: 1px solid var(--line); }
-    .section-head {
-      display: flex;
-      flex-direction: column;
-      gap: .85rem;
-      margin-bottom: clamp(2rem, 4vw, 3rem);
-    }
-    .kicker {
-      font-size: .68rem;
-      font-weight: 500;
-      letter-spacing: .26em;
-      text-transform: uppercase;
-      color: var(--accent);
-    }
-    h2 {
-      margin: 0;
-      font-size: clamp(1.7rem, 3.6vw, 2.8rem);
-      font-weight: 600;
-      line-height: 1.05;
-      letter-spacing: .015em;
-      text-transform: uppercase;
-    }
-
-    /* ---------- hero ---------- */
     .hero {
-      position: relative;
-      z-index: 1;
-      min-height: 100svh;
-      display: flex;
-      align-items: center;
-      padding: calc(var(--nav-h) + clamp(2rem, 6vw, 5rem)) clamp(1.25rem, 4vw, 2rem) clamp(3rem, 6vw, 5rem);
-    }
-    .hero::before {
-      content: "";
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      height: 45%;
-      background:
-        radial-gradient(ellipse 70% 60% at 50% 120%, rgba(143, 180, 255, .16), transparent 70%),
-        radial-gradient(ellipse 40% 30% at 70% 130%, rgba(255, 180, 107, .08), transparent 70%);
-      pointer-events: none;
-    }
-    .hero::after {
-      content: "";
-      position: absolute;
-      left: 50%;
-      bottom: 0;
-      width: min(1100px, 92%);
-      height: 1px;
-      transform: translateX(-50%);
-      background: linear-gradient(90deg, transparent, var(--line-strong), transparent);
+      min-height: 100vh; display: flex; align-items: center;
+      padding-top: calc(var(--nav-h) + 2rem); padding-bottom: 3rem;
     }
     .hero-inner {
-      position: relative;
-      z-index: 2;
-      width: 100%;
-      max-width: var(--max);
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr);
-      gap: clamp(2rem, 6vw, 5rem);
-      align-items: center;
+      display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr);
+      gap: clamp(2rem, 5vw, 4rem); align-items: center;
     }
-    .hero-copy { grid-column: 1; }
     .eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: .8rem;
-      font-size: .68rem;
-      font-weight: 500;
-      letter-spacing: .28em;
-      text-transform: uppercase;
-      color: var(--accent);
+      display: inline-flex; align-items: center; gap: .8rem; font-size: .68rem;
+      letter-spacing: .28em; text-transform: uppercase; color: var(--accent);
     }
     .eyebrow::before {
-      content: "";
-      width: 30px;
-      height: 1px;
-      background: var(--accent);
+      content: ""; width: 30px; height: 1px; background: var(--accent);
     }
     h1 {
-      margin: 1.1rem 0 0;
-      font-size: clamp(3rem, 7.6vw, 6.2rem);
-      font-weight: 600;
-      line-height: .92;
-      letter-spacing: .015em;
-      text-transform: uppercase;
+      margin: 1rem 0 0; font-size: clamp(3rem, 7vw, 6rem); line-height: .9;
+      letter-spacing: .015em; text-transform: uppercase;
     }
     h1 span { color: var(--accent); }
     .tagline {
-      margin: 1.2rem 0 0;
-      max-width: 34rem;
-      color: var(--body);
-      font-size: clamp(.98rem, 1.4vw, 1.12rem);
-      line-height: 1.65;
-      font-weight: 300;
+      margin-top: 1.2rem; max-width: 34rem; color: var(--body); font-size: 1.05rem; line-height: 1.7;
     }
-    .countdown-wrap { margin-top: clamp(1.8rem, 4vw, 2.6rem); }
+    .countdown-wrap { margin-top: 2rem; }
     .countdown-label {
-      font-size: .64rem;
-      letter-spacing: .24em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: .55rem;
+      font-size: .64rem; letter-spacing: .24em; text-transform: uppercase; color: var(--muted);
+      margin-bottom: .6rem;
     }
     .countdown {
-      display: flex;
-      align-items: baseline;
-      gap: .15rem;
-      font-size: clamp(2.1rem, 4.6vw, 3.5rem);
-      font-weight: 500;
-      letter-spacing: .02em;
-      line-height: 1;
-      font-variant-numeric: tabular-nums;
+      display: flex; align-items: baseline; gap: .15rem; font-size: clamp(2.2rem, 4.5vw, 3.5rem);
+      font-weight: 500; letter-spacing: .02em; line-height: 1; font-variant-numeric: tabular-nums;
     }
     .countdown .dash { color: var(--accent); margin-right: .15rem; }
     .countdown .num { color: var(--text); }
-    .countdown .unit {
-      color: var(--muted);
-      font-size: .44em;
-      font-weight: 400;
-      letter-spacing: .06em;
-      margin: 0 .7rem 0 .12rem;
-      text-transform: lowercase;
-    }
+    .countdown .unit { color: var(--muted); font-size: .44em; margin: 0 .7rem 0 .12rem; }
     .launch-meta {
-      display: flex;
-      flex-wrap: wrap;
-      margin-top: clamp(1.8rem, 4vw, 2.4rem);
-      padding-top: 1.2rem;
+      display: flex; flex-wrap: wrap; gap: 1.5rem 2rem; margin-top: 2.2rem; padding-top: 1.2rem;
       border-top: 1px solid var(--line);
     }
-    .launch-meta > div {
-      padding-right: 1.75rem;
-      margin-right: 1.75rem;
-      border-right: 1px solid var(--line);
-    }
-    .launch-meta > div:last-child {
-      padding-right: 0;
-      margin-right: 0;
-      border-right: 0;
-    }
+    .launch-meta div { padding-right: 1.5rem; border-right: 1px solid var(--line); }
+    .launch-meta div:last-child { border-right: 0; }
     .launch-meta span {
-      display: block;
-      margin-bottom: .32rem;
-      font-size: .62rem;
-      letter-spacing: .2em;
-      text-transform: uppercase;
-      color: var(--muted);
+      display: block; margin-bottom: .25rem; font-size: .62rem; letter-spacing: .2em;
+      text-transform: uppercase; color: var(--muted);
     }
     .launch-meta strong {
-      font-size: .95rem;
-      font-weight: 500;
-      letter-spacing: .03em;
-      white-space: nowrap;
+      font-size: 1rem; font-weight: 500; letter-spacing: .03em; white-space: nowrap;
     }
     .hero-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: .75rem;
-      margin-top: 2rem;
+      display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 2rem;
     }
     .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: .5rem;
-      padding: .9rem 1.5rem;
-      border: 1px solid transparent;
-      border-radius: 2px;
-      font-size: .72rem;
-      font-weight: 600;
-      letter-spacing: .16em;
-      text-transform: uppercase;
-      text-decoration: none;
-      cursor: pointer;
-      transition: background .2s ease, color .2s ease, border-color .2s ease;
+      display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+      padding: .9rem 1.5rem; border: 1px solid transparent; border-radius: 2px;
+      font-size: .72rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase;
+      text-decoration: none; cursor: pointer; transition: .2s ease;
     }
     .btn-primary { background: var(--text); color: var(--bg); }
     .btn-primary:hover { background: var(--accent); }
-    .btn-ghost { border-color: var(--line-strong); color: var(--text); background: transparent; }
+    .btn-ghost { border-color: var(--line); color: var(--text); background: transparent; }
     .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
-
-    .hero-patch {
-      grid-column: 2;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1rem;
-    }
     .patch-frame {
-      position: relative;
-      width: clamp(210px, 25vw, 340px);
-      aspect-ratio: 1;
-      display: grid;
-      place-items: center;
+      position: relative; width: min(28vw, 340px); aspect-ratio: 1; margin-inline: auto;
+      display: grid; place-items: center;
     }
     .patch-frame::before {
-      content: "";
-      position: absolute;
-      inset: -14%;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(143, 180, 255, .24), transparent 65%);
+      content: ""; position: absolute; inset: -14%; border-radius: 50%;
+      background: radial-gradient(circle, rgba(143,180,255,.24), transparent 65%);
       filter: blur(12px);
     }
-    .patch-frame::after {
-      content: "";
-      position: absolute;
-      inset: -2%;
-      border-radius: 50%;
-      border: 1px solid rgba(143, 180, 255, .18);
-    }
     .patch-frame img {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      filter: drop-shadow(0 28px 60px rgba(0, 0, 0, .65));
-      animation: float 7s ease-in-out infinite;
-    }
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
+      position: relative; width: 100%; height: 100%; object-fit: contain;
+      filter: drop-shadow(0 28px 60px rgba(0,0,0,.65));
     }
     .patch-caption {
-      font-size: .6rem;
-      letter-spacing: .26em;
-      text-transform: uppercase;
-      color: var(--muted);
-      text-align: center;
+      text-align: center; margin-top: 1rem; font-size: .6rem; letter-spacing: .26em;
+      text-transform: uppercase; color: var(--muted);
     }
-
-    /* ---------- mission ---------- */
+    .section {
+      padding: clamp(4rem, 7vw, 6rem) 0;
+      border-top: 1px solid var(--line);
+    }
+    .section-head {
+      margin-bottom: 2rem; display: flex; flex-direction: column; gap: .85rem;
+    }
+    .kicker {
+      font-size: .68rem; letter-spacing: .26em; text-transform: uppercase; color: var(--accent);
+      font-weight: 500;
+    }
+    h2 {
+      margin: 0; font-size: clamp(1.7rem, 3vw, 2.7rem); line-height: 1.05;
+      letter-spacing: .015em; text-transform: uppercase;
+    }
     .split {
-      display: grid;
-      grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr);
-      gap: clamp(2rem, 5vw, 4rem);
-      align-items: start;
+      display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr); gap: clamp(2rem, 5vw, 4rem);
     }
-    .lead {
-      margin: 0;
-      font-size: clamp(1.02rem, 1.5vw, 1.22rem);
-      line-height: 1.75;
-      color: var(--body);
-      font-weight: 300;
-    }
-    .lead strong { color: var(--text); font-weight: 500; }
-    .lead p + p { margin-top: 1.1rem; }
+    .lead { color: var(--body); font-size: 1.05rem; line-height: 1.8; }
+    .lead p + p { margin-top: 1rem; }
     .facts {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-      border-top: 1px solid var(--line-strong);
+      list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--line);
     }
     .facts li {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      gap: 1.25rem;
-      padding: .95rem 0;
-      border-bottom: 1px solid var(--line);
+      display: flex; justify-content: space-between; align-items: baseline; gap: 1.25rem;
+      padding: .95rem 0; border-bottom: 1px solid var(--line);
     }
     .facts .k {
-      font-size: .64rem;
-      letter-spacing: .18em;
-      text-transform: uppercase;
-      color: var(--muted);
+      font-size: .64rem; letter-spacing: .18em; text-transform: uppercase; color: var(--muted);
     }
-    .facts .v {
-      font-size: .92rem;
-      font-weight: 500;
-      letter-spacing: .03em;
-      text-align: right;
-    }
-
-    /* ---------- vehicle ---------- */
-    .vehicle-word {
-      margin: 0 0 clamp(1.5rem, 4vw, 2.5rem);
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: clamp(2.6rem, 10.5vw, 8.6rem);
-      font-weight: 700;
-      line-height: .9;
-      letter-spacing: .01em;
-      text-transform: uppercase;
-      color: transparent;
-      -webkit-text-stroke: 1px rgba(255, 255, 255, .22);
-      white-space: nowrap;
-      overflow: hidden;
-    }
-    .vehicle-word span { -webkit-text-stroke: 1px rgba(143, 180, 255, .5); }
+    .facts .v { font-size: .92rem; font-weight: 500; text-align: right; }
     .cards {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 1px;
-      border: 1px solid var(--line);
-      background: var(--line);
+      display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line);
     }
-    .card {
-      background: var(--bg-2);
-      padding: clamp(1.25rem, 3vw, 1.8rem);
-    }
+    .card { background: var(--bg-2); padding: 1.5rem; }
     .card .k {
-      display: block;
-      margin-bottom: .7rem;
-      font-size: .62rem;
-      letter-spacing: .2em;
-      text-transform: uppercase;
-      color: var(--accent);
+      display: block; margin-bottom: .7rem; font-size: .62rem; letter-spacing: .2em; text-transform: uppercase; color: var(--accent);
     }
-    .card .v {
-      display: block;
-      font-size: clamp(1rem, 1.5vw, 1.15rem);
-      font-weight: 500;
-      letter-spacing: .02em;
-      line-height: 1.35;
-    }
-    .card .s {
-      display: block;
-      margin-top: .45rem;
-      font-size: .82rem;
-      color: var(--muted);
-      line-height: 1.5;
-    }
-
-    /* ---------- live ---------- */
-    .player {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 16 / 9;
-      background: #000;
-      border: 1px solid var(--line-strong);
-      overflow: hidden;
-    }
-    .player video {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      background: #000;
-      display: block;
-    }
-    .overlay {
-      position: absolute;
-      inset: 0;
-      z-index: 2;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 1.5rem;
-      font-size: .85rem;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      color: var(--muted);
-      background:
-        radial-gradient(circle at center, rgba(11, 17, 24, .82), rgba(0, 0, 0, .94));
-    }
-    .live-badge {
-      position: absolute;
-      top: .8rem;
-      left: .8rem;
-      z-index: 3;
-      display: inline-flex;
-      align-items: center;
-      gap: .45rem;
-      padding: .32rem .65rem;
-      background: rgba(0, 0, 0, .65);
-      border: 1px solid rgba(255, 59, 48, .55);
-      border-radius: 2px;
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: .62rem;
-      font-weight: 600;
-      letter-spacing: .18em;
-      text-transform: uppercase;
-    }
-    .live-badge .dot {
-      width: .45rem;
-      height: .45rem;
-      border-radius: 50%;
-      background: var(--live);
-      animation: pulse 1.6s infinite;
-    }
-    @keyframes pulse {
-      0% { box-shadow: 0 0 0 0 rgba(255, 59, 48, .6); }
-      70% { box-shadow: 0 0 0 8px rgba(255, 59, 48, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0); }
-    }
-    .player-bar {
-      display: flex;
-      align-items: center;
-      gap: .9rem;
-      flex-wrap: wrap;
-      padding: .85rem 1rem;
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-top: 0;
-    }
-    .status {
-      display: inline-flex;
-      align-items: center;
-      gap: .5rem;
-      font-size: .72rem;
-      letter-spacing: .06em;
-      color: var(--body);
-    }
-    .status .dot {
-      width: .42rem;
-      height: .42rem;
-      border-radius: 50%;
-      background: var(--muted);
-    }
-    .status.is-live .dot { background: var(--ok); box-shadow: 0 0 10px rgba(56, 211, 159, .8); }
-    .status.is-error .dot { background: var(--live); }
-    .updated {
-      font-size: .7rem;
-      color: var(--muted);
-      letter-spacing: .03em;
-    }
-    .spacer { flex: 1; }
-    .player-bar button {
-      appearance: none;
-      padding: .55rem .85rem;
-      background: transparent;
-      border: 1px solid var(--line-strong);
-      border-radius: 2px;
-      color: var(--text);
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: .64rem;
-      font-weight: 600;
-      letter-spacing: .14em;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: border-color .2s ease, color .2s ease;
-    }
-    .player-bar button:hover { border-color: var(--accent); color: var(--accent); }
-    .live-note {
-      margin: 1rem 0 0;
-      font-size: .76rem;
-      color: var(--muted);
-      line-height: 1.6;
-    }
-    .live-note strong { color: var(--body); font-weight: 500; }
-
-    /* ---------- timeline ---------- */
-    .timeline {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-      border-top: 1px solid var(--line-strong);
-    }
-    .timeline li {
-      display: grid;
-      grid-template-columns: 130px minmax(0, 1fr);
-      gap: clamp(1rem, 3vw, 2rem);
-      padding: 1.05rem 0;
-      border-bottom: 1px solid var(--line);
-    }
-    .timeline .t {
-      font-size: .82rem;
-      font-weight: 500;
-      letter-spacing: .06em;
-      color: var(--accent);
-      font-variant-numeric: tabular-nums;
-    }
-    .timeline .d {
-      font-size: .92rem;
-      color: var(--body);
-      line-height: 1.55;
-    }
-    .timeline li.is-key .t { color: var(--text); }
-    .timeline li.is-key .d { color: var(--text); font-weight: 500; }
-
-    /* ---------- team ---------- */
-    .team-card {
-      display: grid;
-      grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
-      gap: clamp(2rem, 5vw, 4rem);
-      align-items: center;
-      padding: clamp(1.4rem, 4vw, 3rem);
-      border: 1px solid var(--line);
-      background: linear-gradient(135deg, rgba(255, 255, 255, .035), transparent 60%);
-    }
-    .team-logo-wrap {
-      display: grid;
-      place-items: center;
-      padding: clamp(1.5rem, 4vw, 2.75rem);
-      border: 1px solid var(--line);
-      background: radial-gradient(circle at 50% 40%, rgba(143, 180, 255, .10), transparent 70%);
-    }
-    .team-logo {
-      width: 100%;
-      max-width: 380px;
-      height: auto;
-      object-fit: contain;
-    }
-    .team-copy h3 {
-      margin: 0 0 .9rem;
-      font-size: clamp(1.3rem, 2.4vw, 1.7rem);
-      font-weight: 600;
-      letter-spacing: .04em;
-      text-transform: uppercase;
-    }
-    .team-copy p {
-      margin: 0;
-      color: var(--body);
-      font-size: .95rem;
-      line-height: 1.75;
-      font-weight: 300;
-    }
-    .team-copy p + p { margin-top: .9rem; }
-
-    /* ---------- footer ---------- */
+    .card .v { display: block; font-size: 1.08rem; font-weight: 500; line-height: 1.35; }
+    .card .s { display: block; margin-top: .45rem; color: var(--muted); font-size: .82rem; line-height: 1.5; }
     footer {
-      position: relative;
-      z-index: 1;
-      width: 100%;
-      max-width: var(--max);
-      margin: 0 auto;
-      padding: 2rem clamp(1.25rem, 4vw, 2rem) 2.5rem;
+      display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;
+      padding: 2rem 0 2.5rem; color: var(--muted); font-size: .74rem; letter-spacing: .04em;
       border-top: 1px solid var(--line);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 1rem;
-      flex-wrap: wrap;
-      color: var(--muted);
-      font-size: .74rem;
-      letter-spacing: .04em;
     }
-    footer a { color: var(--muted); text-decoration: none; transition: color .2s ease; }
+    footer a { color: var(--muted); text-decoration: none; }
     footer a:hover { color: var(--text); }
-
-    /* ---------- reveal ---------- */
-    .reveal {
-      opacity: 0;
-      transform: translateY(26px);
-      transition: opacity .85s ease, transform .85s cubic-bezier(.2, .7, .2, 1);
-    }
-    .reveal.in { opacity: 1; transform: none; }
-
     @media (max-width: 900px) {
-      .hero-inner { grid-template-columns: 1fr; gap: 2.25rem; }
-      .hero-copy { grid-column: 1; }
-      .hero-patch { grid-column: 1; order: -1; align-items: flex-start; }
-      .patch-frame { width: clamp(150px, 40vw, 230px); }
-      .split { grid-template-columns: 1fr; }
-      .cards { grid-template-columns: 1fr; }
-      .team-card { grid-template-columns: 1fr; }
+      .hero-inner, .split { grid-template-columns: 1fr; }
+      .patch-frame { width: min(52vw, 240px); }
       .nav nav { display: none; }
       .nav-status { margin-left: auto; }
-    }
-    @media (max-width: 560px) {
-      .brand-caption { display: none; }
-      .nav-status { font-size: .58rem; padding-left: .9rem; margin-left: .5rem; }
-      .launch-meta > div { padding-right: 1.1rem; margin-right: 1.1rem; }
-      .timeline li { grid-template-columns: 96px minmax(0, 1fr); }
-      .section + .section { border-top-color: var(--line); }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      html { scroll-behavior: auto; }
-      .stars, .stars::after, .patch-frame img { animation: none; }
-      .reveal { opacity: 1; transform: none; transition: none; }
-      .live-badge .dot { animation: none; }
+      .cards { grid-template-columns: 1fr; }
     }
   </style>
-  <noscript><style>.reveal { opacity: 1; transform: none; }</style></noscript>
 </head>
 <body>
   <div class="stars" aria-hidden="true"></div>
@@ -759,19 +236,19 @@
     <nav aria-label="Hlavní navigace">
       <a href="#mission">Mise</a>
       <a href="#vehicle">Raketa</a>
+      <a href="rampa.html">Rampa</a>
       <a href="#live">Živě</a>
-      <a href="#timeline">Timeline</a>
       <a href="#team">Tým</a>
     </nav>
     <div class="nav-status"><span class="dot"></span><span id="nav-status-text">Go for launch</span></div>
   </header>
 
   <main id="top">
-    <section class="hero" aria-labelledby="hero-title">
+    <section class="hero">
       <div class="hero-inner">
-        <div class="hero-copy">
+        <div>
           <div class="eyebrow">Mellotech · Inaugural Launch</div>
-          <h1 id="hero-title">Cassiopeia <span>I</span></h1>
+          <h1>Cassiopeia <span>I</span></h1>
           <p class="tagline">
             První start nosné rakety Cassiopeia I. Nová kapitola letů týmu Mellotech
             začíná 21. listopadu 2026 ve 14:00 českého času.
@@ -790,11 +267,12 @@
 
           <div class="hero-actions">
             <a class="btn btn-primary" href="#live">Sledovat živě</a>
+            <a class="btn btn-ghost" href="rampa.html">Náhled rampy</a>
             <a class="btn btn-ghost" href="#mission">O misi</a>
           </div>
         </div>
 
-        <div class="hero-patch">
+        <div>
           <div class="patch-frame">
             <img src="assets/mission-logo.png" alt="Logo mise Cassiopeia I">
           </div>
@@ -803,23 +281,20 @@
       </div>
     </section>
 
-    <section class="section reveal" id="mission" aria-labelledby="mission-title">
+    <section class="section" id="mission">
       <div class="section-head">
         <span class="kicker">01 — Mission</span>
-        <h2 id="mission-title">Mise Cassiopeia I</h2>
+        <h2>Mise Cassiopeia I</h2>
       </div>
       <div class="split">
         <div class="lead">
           <p>
-            <strong>Cassiopeia I</strong> je první start nosné rakety stejného jména
-            a zároveň první letová mise týmu Mellotech. Cílem je ověřit kompletní
-            letový profil — od zážehu motorů přes oddělení stupňů až po dosažení
-            plánované trajektorie.
+            <strong>Cassiopeia I</strong> je první start nosné rakety stejného jména a zároveň první letová mise týmu Mellotech.
+            Cílem je ověřit kompletní letový profil od zážehu motorů po dosažení plánované trajektorie.
           </p>
           <p>
-            Každý systém rakety byl navržen, postaven a otestován členy týmu
-            Mellotech. Start je naplánován na <strong>21. listopadu 2026 ve 14:00 CET</strong>
-            a celý průběh budete moci sledovat v živém přenosu níže.
+            Každý systém rakety byl navržen, postaven a otestován členy týmu Mellotech. Start je naplánován na
+            <strong>21. listopadu 2026 ve 14:00 CET</strong> a celý průběh budete moci sledovat v živém přenosu.
           </p>
         </div>
         <ul class="facts">
@@ -832,12 +307,11 @@
       </div>
     </section>
 
-    <section class="section reveal" id="vehicle" aria-labelledby="vehicle-title">
+    <section class="section" id="vehicle">
       <div class="section-head">
         <span class="kicker">02 — Vehicle</span>
-        <h2 id="vehicle-title">Nosná raketa</h2>
+        <h2>Nosná raketa</h2>
       </div>
-      <div class="vehicle-word" aria-hidden="true">Cassiopeia <span>I</span></div>
       <div class="cards">
         <div class="card">
           <span class="k">Mise</span>
@@ -857,68 +331,26 @@
       </div>
     </section>
 
-    <section class="section reveal" id="live" aria-labelledby="live-title">
+    <section class="section" id="live">
       <div class="section-head">
         <span class="kicker">03 — Live</span>
-        <h2 id="live-title">Živý přenos z rampy</h2>
+        <h2>Živý přenos z rampy</h2>
       </div>
-
-      <div class="player">
-        <video id="video" muted playsinline controls autoplay></video>
-        <div id="overlay" class="overlay">Připojování…</div>
-        <div id="live-badge" class="live-badge" hidden><span class="dot"></span>Live</div>
-      </div>
-      <div class="player-bar">
-        <span id="status" class="status"><span class="dot"></span><span id="status-text">Načítám…</span></span>
-        <span id="updated" class="updated"></span>
-        <span class="spacer"></span>
-        <button id="reload" type="button">Znovu načíst</button>
-        <button id="fullscreen" type="button">Celá obrazovka</button>
-      </div>
-      <p class="live-note">
-        <strong>Živý přenos</strong> běží z kamery na startovní rampě. Zpoždění je
-        přibližně 1–3 sekundy. Pokud je přenos offline, vysílač se právě spouští —
-        zkuste stránku obnovit za chvíli.
-      </p>
+      <p class="lead">Přenos z kamery na rampě se spouští automaticky z lokálního streamu. Pro náhled místa startu použij odkaz <a href="rampa.html" style="color:#8fb4ff;">Rampa</a>.</p>
     </section>
 
-    <section class="section reveal" id="timeline" aria-labelledby="timeline-title">
-      <div class="section-head">
-        <span class="kicker">04 — Timeline</span>
-        <h2 id="timeline-title">Průběh startu</h2>
-      </div>
-      <ul class="timeline">
-        <li><span class="t">T-60 min</span><span class="d">Zahájení terminálového odpočtu a kontrola systémů rakety.</span></li>
-        <li><span class="t">T-30 min</span><span class="d">Aktivace nosné rakety a finální kontrola pozemní infrastruktury.</span></li>
-        <li><span class="t">T-10 min</span><span class="d">Příprava pohonných systémů a přechod na letovou konfiguraci.</span></li>
-        <li><span class="t">T-3 min</span><span class="d">Raketa přechází na vnitřní napájení, počítače přebírají řízení.</span></li>
-        <li><span class="t">T-1 min</span><span class="d">Finální odpočet, uzamčení letového profilu.</span></li>
-        <li class="is-key"><span class="t">T-0</span><span class="d">Start rakety Cassiopeia I.</span></li>
-        <li><span class="t">T+1 min</span><span class="d">Ověření zážehu a průběhu stoupání.</span></li>
-        <li><span class="t">T+3 min</span><span class="d">Kritické letové manévry a separace stupňů.</span></li>
-      </ul>
-    </section>
-
-    <section class="section reveal" id="team" aria-labelledby="team-title">
+    <section class="section" id="team">
       <div class="section-head">
         <span class="kicker">05 — Team</span>
-        <h2 id="team-title">Tým Mellotech</h2>
+        <h2>Tým Mellotech</h2>
       </div>
-      <div class="team-card">
-        <div class="team-logo-wrap">
-          <img class="team-logo" src="assets/team-logo.png" alt="Logo týmu Mellotech">
+      <div class="split">
+        <div>
+          <img src="assets/team-logo.png" alt="Logo týmu Mellotech" style="max-width:380px; margin:0 auto;">
         </div>
-        <div class="team-copy">
-          <h3>Mellotech</h3>
-          <p>
-            Mellotech je tým inženýrů, konstruktérů a operátorů, který stojí za
-            misí Cassiopeia I. Spojuje návrh, výrobu, testování a samotné řízení
-            startu do jednoho celku.
-          </p>
-          <p>
-            Cassiopeia I je první letová mise týmu. Každý úspěšný i neúspěšný
-            test posouvá další generaci rakety dál.
-          </p>
+        <div class="lead">
+          <p>Mellotech je tým inženýrů, konstruktérů a operátorů, který stojí za misí Cassiopeia I.</p>
+          <p>Cassiopeia I je první letová mise týmu. Každý úspěšný i neúspěšný test posouvá další generaci rakety dál.</p>
         </div>
       </div>
     </section>
@@ -930,9 +362,7 @@
     <a href="https://github.com/simonbalog/launch" target="_blank" rel="noopener">GitHub</a>
   </footer>
 
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
   <script>
-    /* ---------------- launch countdown ---------------- */
     const LAUNCH_DATE = new Date('2026-11-21T14:00:00+01:00');
     const countdownEl = document.getElementById('countdown');
     const navStatusText = document.getElementById('nav-status-text');
@@ -947,12 +377,8 @@
       const minutes = totalMinutes % 60;
 
       const parts = ['<span class="dash">T-</span>'];
-      if (days > 0) {
-        parts.push('<span class="num">' + pad2(days) + '</span><span class="unit">d</span>');
-      }
-      if (days > 0 || hours > 0) {
-        parts.push('<span class="num">' + pad2(hours) + '</span><span class="unit">h</span>');
-      }
+      if (days > 0) parts.push('<span class="num">' + pad2(days) + '</span><span class="unit">d</span>');
+      if (days > 0 || hours > 0) parts.push('<span class="num">' + pad2(hours) + '</span><span class="unit">h</span>');
       parts.push('<span class="num">' + pad2(minutes) + '</span><span class="unit">m</span>');
       countdownEl.innerHTML = parts.join('');
 
@@ -965,166 +391,10 @@
     renderCountdown();
     setInterval(renderCountdown, 1000);
 
-    /* ---------------- nav state ---------------- */
     const nav = document.getElementById('nav');
     const onScroll = () => nav.classList.toggle('scrolled', window.scrollY > 24);
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
-
-    /* ---------------- reveal on scroll ---------------- */
-    const revealEls = document.querySelectorAll('.reveal');
-    if ('IntersectionObserver' in window) {
-      const io = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('in');
-            io.unobserve(entry.target);
-          }
-        });
-      }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
-      revealEls.forEach((el) => io.observe(el));
-    } else {
-      revealEls.forEach((el) => el.classList.add('in'));
-    }
-
-    /* ---------------- live player ---------------- */
-    const video = document.getElementById('video');
-    const overlay = document.getElementById('overlay');
-    const liveBadge = document.getElementById('live-badge');
-    const statusEl = document.getElementById('status');
-    const statusText = document.getElementById('status-text');
-    const updatedEl = document.getElementById('updated');
-    const reloadBtn = document.getElementById('reload');
-    const fullscreenBtn = document.getElementById('fullscreen');
-
-    let hls = null;
-    let currentUrl = null;
-    let retryTimer = null;
-
-    function setOverlay(text, visible) {
-      overlay.textContent = text;
-      overlay.style.display = visible ? 'flex' : 'none';
-    }
-
-    function setStatus(text, state) {
-      statusText.textContent = text;
-      statusEl.classList.toggle('is-live', state === 'live');
-      statusEl.classList.toggle('is-error', state === 'error');
-    }
-
-    function destroyPlayer() {
-      clearTimeout(retryTimer);
-      if (hls) {
-        hls.destroy();
-        hls = null;
-      }
-      video.removeAttribute('src');
-      video.load();
-      liveBadge.hidden = true;
-    }
-
-    async function loadConfig() {
-      try {
-        const res = await fetch('stream.json?t=' + Date.now(), { cache: 'no-store' });
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        return await res.json();
-      } catch (err) {
-        return { url: '', updated: '' };
-      }
-    }
-
-    function scheduleRetry() {
-      clearTimeout(retryTimer);
-      retryTimer = setTimeout(() => refresh(true), 5000);
-    }
-
-    function attach(url) {
-      destroyPlayer();
-      currentUrl = url;
-
-      if (!url) {
-        setOverlay('Přenos zatím není aktivní', true);
-        setStatus('Čekám na vysílač', 'idle');
-        return;
-      }
-
-      const src = url.replace(/\/+$/, '') + '/index.m3u8';
-      setOverlay('Připojování…', true);
-      setStatus('Připojuji…', 'idle');
-
-      if (window.Hls && window.Hls.isSupported()) {
-        hls = new window.Hls({
-          lowLatencyMode: true,
-          liveSyncDurationCount: 1,
-          liveMaxLatencyDurationCount: 3,
-          maxLiveSyncPlaybackRate: 2,
-          backBufferLength: 10,
-          manifestLoadingMaxRetry: 6,
-          fragLoadingMaxRetry: 6
-        });
-        hls.loadSource(src);
-        hls.attachMedia(video);
-        hls.on(window.Hls.Events.MANIFEST_PARSED, () => {
-          video.play().catch(() => {});
-        });
-        hls.on(window.Hls.Events.ERROR, (_event, data) => {
-          if (!data.fatal) return;
-          if (data.type === window.Hls.ErrorTypes.NETWORK_ERROR) {
-            setStatus('Síťová chyba, zkouším znovu…', 'idle');
-            hls.startLoad();
-          } else if (data.type === window.Hls.ErrorTypes.MEDIA_ERROR) {
-            hls.recoverMediaError();
-          } else {
-            setStatus('Přenos spadl, obnovuji…', 'error');
-            scheduleRetry();
-          }
-        });
-      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-        video.src = src;
-        video.play().catch(() => {});
-      } else {
-        setOverlay('Tento prohlížeč neumí přehrávat HLS.', true);
-        setStatus('Nepodporovaný prohlížeč', 'error');
-      }
-    }
-
-    video.addEventListener('playing', () => {
-      setOverlay('', false);
-      liveBadge.hidden = false;
-      setStatus('Přenos běží', 'live');
-    });
-
-    video.addEventListener('waiting', () => {
-      if (currentUrl) setStatus('Načítání…', 'idle');
-    });
-
-    video.addEventListener('error', () => {
-      if (currentUrl) {
-        setStatus('Chyba přehrávání, obnovuji…', 'error');
-        scheduleRetry();
-      }
-    });
-
-    async function refresh(force) {
-      const cfg = await loadConfig();
-      updatedEl.textContent = cfg.updated
-        ? 'Aktualizováno ' + new Date(cfg.updated).toLocaleString('cs-CZ')
-        : '';
-
-      if (force || cfg.url !== currentUrl) {
-        attach(cfg.url);
-      }
-    }
-
-    reloadBtn.addEventListener('click', () => refresh(true));
-    fullscreenBtn.addEventListener('click', () => {
-      if (video.requestFullscreen) video.requestFullscreen();
-    });
-
-    refresh(true);
-    setInterval(() => {
-      if (document.visibilityState === 'visible') refresh(false);
-    }, 20000);
   </script>
 </body>
 </html>
