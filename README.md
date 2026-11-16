@@ -6,8 +6,8 @@ Launch stránka pro první start nosné rakety **Cassiopeia I** týmu **Mellotec
 (21. 11. 2026, 14:00 CET) s živým přenosem z kamery.
 
 Projekt vezme obraz z webkamery tohoto počítače, zabalí ho do HLS a vystaví
-přes Cloudflare tunel. GitHub Pages slouží jako veřejná stránka s přehrávačem.
-Nepotřebuješ VPS ani veřejnou IP.
+přes Cloudflare Quick Tunnel. GitHub Pages hostí pouze stránku s přehrávačem.
+VPS ani veřejná IP nejsou potřeba.
 
 ## Jak to funguje
 
@@ -15,26 +15,31 @@ Nepotřebuješ VPS ani veřejnou IP.
 kamera (/dev/video0)
       │  ffmpeg (H.264 + HLS)
       ▼
-stream/hls/  ──►  lokální HTTP server (CORS, :8080)
-                        │
-                        ▼
-              cloudflared quick tunnel  ──►  https://<nahodne>.trycloudflare.com
-                        │
-                        ▼
-GitHub Pages (docs/index.html)  ──►  přehrávač hls.js
+stream/hls/  ──►  loopback HTTP server (:8080)
+                         │
+                         ▼
+               cloudflared Quick Tunnel ──► https://<nahodne>.trycloudflare.com
+                         │
+                         ▼
+GitHub Pages (docs/index.html) ──► hls.js player
 ```
 
-`run.sh` po startu zjistí veřejnou URL tunelu, zapíše ji do `docs/stream.json`
-a commitne/pushne na GitHub. Stránka na GitHub Pages si ji načte a přehraje.
+`run.sh` spustí FFmpeg, lokální server a tunel. Veřejnou URL ověří přes `/health`
+a až poté atomicky zapíše do `docs/stream.json`. Pokud se URL změnila a Git index
+neobsahuje cizí staged změny, skript provede cílený commit a push pouze tohoto
+souboru. `stop.sh` ukončí pouze procesy odpovídající očekávaným binárkám a zkusí
+publikovat offline stav.
 
 ## Požadavky
 
-- Linux x86_64, přístup ke kameře (`/dev/video0`)
-- `python3`, `git`, `curl`
-- Účet na GitHubu s právem push do `simonbalog/launch`
+- Linux x86_64 a čitelná kamera (výchozí `/dev/video0`)
+- `python3`, `git`, `curl`, `tar`, `flock` (obvykle `util-linux`)
+- GitHub oprávnění push pro repozitář, pokud se má URL automaticky publikovat
 
-`setup.sh` automaticky stáhne statický `ffmpeg` a `cloudflared` do `bin/`,
-takže není potřeba `sudo` ani instalace balíčků.
+`setup.sh` stáhne statické FFmpeg a `cloudflared` do `bin/`. Stahování používá
+TLS, retry, kontrolu struktury/binarity a atomickou instalaci. Jde stále o
+binárky stažené od upstream vydavatelů bez lokálně ověřeného checksumu — pro
+produkční provoz připni verzi a ověř publikované kontrolní součty.
 
 ## První nastavení
 
@@ -42,43 +47,27 @@ takže není potřeba `sudo` ani instalace balíčků.
 ./setup.sh
 ```
 
-Skript:
+Skript omezuje staging na soubory projektu a nahrává je na nakonfigurovanou větev.
+GitHub Pages zapni v **Settings → Pages → Deploy from a branch** a vyber větev
+`main` a adresář `/docs` (nebo odpovídající nastavení repozitáře).
 
-1. stáhne `ffmpeg` a `cloudflared` do `bin/`,
-2. ověří kameru,
-3. založí git repo (pokud není) a nastaví remote,
-4. pushne soubory na GitHub,
-5. zkusí zapnout GitHub Pages (`main` / `docs`).
+> `config.env` je načítán jako Bash skript. Upravuj ho jen tehdy, když mu důvěřuješ;
+> nevkládej do něj obsah z nedůvěryhodných zdrojů.
 
-Pokud se Pages nezapnou automaticky, udělej to ručně:
-**Settings → Pages → Deploy from a branch → main / `docs`**.
-
-Stránka pak běží na `https://simonbalog.github.io/launch/`.
-
-## Landing page a odpočet
-
-Obsah stránky je v `docs/index.html`, loga v `docs/assets/`. Odpočet startu se
-řídí konstantou `LAUNCH_DATE` ve skriptu na konci `index.html`:
-
-```js
-const LAUNCH_DATE = new Date('2026-11-21T14:00:00+01:00');
-```
-
-Odpočet se zobrazuje postupně: `T-06d 01h 08m` → `T-01h 08m` → `T-08m`.
-
-## Spuštění streamu
+## Spuštění a zastavení
 
 ```bash
 ./run.sh
+./stop.sh
 ```
 
-Výstup obsahuje veřejnou URL streamu a odkaz na GitHub Pages. Stream běží na
-pozadí.
+Logy jsou v `logs/ffmpeg.log`, `logs/server.log` a `logs/tunnel.log`. Procesy
+jsou evidovány v `run/*.pid`; dočasné playlisty a segmenty v `stream/hls/`.
 
-## Zastavení
+Základní testy HLS serveru lze spustit bez dalších Python balíčků:
 
 ```bash
-./stop.sh
+python3 -m unittest discover -s stream -p 'test_*.py' -v
 ```
 
 ## Konfigurace
@@ -90,44 +79,31 @@ Uprav `config.env`:
 | `VIDEO_DEVICE` | `/dev/video0` | kamera |
 | `VIDEO_SIZE` | `1280x720` | rozlišení |
 | `FRAMERATE` | `30` | FPS |
-| `GOP` | `15` | keyframe každých N snímků (musí odpovídat `HLS_TIME`) |
+| `GOP` | `15` | interval keyframů |
 | `BITRATE` | `1500k` | datový tok videa |
-| `BUFSIZE` | `3000k` | buffer encodéru |
-| `HLS_TIME` | `0.5` | délka segmentu (s) |
-| `HLS_LIST_SIZE` | `6` | počet segmentů v playlistu |
+| `BUFSIZE` | `3000k` | encoder buffer |
+| `HLS_TIME` | `0.5` | délka segmentu v sekundách |
+| `HLS_LIST_SIZE` | `6` | počet segmentů v playlistu (min. 2) |
 | `PORT` | `8080` | lokální port HLS serveru |
+| `GIT_BRANCH` | `main` | větev pro publikování |
+| `PAGES_DIR` | `docs` | adresář GitHub Pages |
+| `REMOTE` | `origin` | Git remote |
+| `SEGMENT_WAIT` | `30` | čekání na lokální HLS, sekundy |
+| `TUNNEL_WAIT` | `60` | čekání na URL tunelu, sekundy |
+| `PUBLIC_WAIT` | `90` | čekání na veřejný health check, sekundy |
 
-Nižší zpoždění: sniž `HLS_TIME` (např. `0.5`) a `GOP` na `FRAMERATE/2`.
-Nižší zpoždění za cenu vyšší zátěže: `GOP=10`, `HLS_TIME=0.333`, `HLS_LIST_SIZE=4`.
-Vyšší kvalita: zvyš `BITRATE` a `VIDEO_SIZE`.
+## Bezpečnost a provozní omezení
 
-## Omezení
-
-- **GitHub Pages neumí přijímat živý stream.** Proto se používá tunel; Pages
-  hostí jen přehrávač.
-- URL z `trycloudflare` je **náhodná při každém spuštění**. `run.sh` ji
-  automaticky publikuje. Pro stálou adresu použij Cloudflare Named Tunnel
-  s vlastní doménou, nebo klasický VPS s MediaMTX.
-- Zpoždění je cca **1–3 s** (HLS + tunel). Minimum HLS bez LL-HLS je zhruba
-  jedna délka segmentu + buffer přehrávače.
-- Po startu může trvat **30–90 s**, než GitHub Pages rebuildne a nová URL se
-  objeví na stránce.
-- Free účet GitHub Pages má soft limit ~10 buildů za hodinu. URL se proto
-  publikuje jen při změně.
-
-## Bezpečnost
-
-Po spuštění je obraz z kamery **veřejně dostupný** komukoli, kdo zná URL tunelu.
-Nesdílej odkaz, pokud nechceš, aby přenos viděl kdokoli. Zastavením `./stop.sh`
-stream okamžitě zmizí (tunel i lokální server se vypnou).
+- **Stream je veřejný.** Každý, kdo získá URL tunelu, může sledovat video. Quick Tunnel není přístupová kontrola. Nesdílej odkaz, pokud stream nemá být veřejný; pro soukromý přenos použij autentizovaný relay/Access vrstvu nebo jinou službu s řízeným přístupem.
+- Lokální HTTP server odmítá bind mimo loopback a zpřístupňuje jen playlist, očekávané HLS segmenty a `/health`. CORS je otevřené, protože veřejná GitHub Pages stránka načítá stream z jiné domény.
+- URL z `trycloudflare.com` je náhodná při každém spuštění. Pro stálou adresu použij Cloudflare Named Tunnel a vlastní doménu.
+- HLS + tunnel přidává přibližně 1–3 sekundy zpoždění. GitHub Pages může po změně `stream.json` potřebovat desítky sekund na rebuild.
+- `stop.sh` smaže lokální HLS segmenty a pokusí se vymazat publikovanou URL. Pokud push selže, stará URL zůstane na stránce, ale její tunnel je ukončen.
 
 ## Řešení problémů
 
-- **Kamera nejde otevřít** – zkontroluj `ls -l /dev/video0` a `VIDEO_DEVICE`.
-  Uživatel musí mít právo čtení (ACL nebo skupina `video`).
-- **Prázdný/rozbitý obraz** – podívej se do `logs/ffmpeg.log`.
-- **Stránka nic nepřehrává** – otevři `docs/stream.json` a zkontroluj `url`.
-  Zkus URL ručně: `<url>/health` a `<url>/index.m3u8`.
-- **Tunel se nespustí** – viz `logs/tunnel.log`; někdy pomůže jiná síť nebo
-  `--protocol http2`.
-- **Zaseknutý stav** – `./stop.sh && ./run.sh`.
+- **Kamera nejde otevřít** – ověř `ls -l /dev/video0`, `VIDEO_DEVICE` a práva uživatele.
+- **Prázdný/rozbitý obraz** – zkontroluj `logs/ffmpeg.log`, rozlišení a formát kamery.
+- **Stránka nic nepřehrává** – ověř `docs/stream.json`, `<url>/health` a `<url>/index.m3u8`.
+- **Tunel se nespustí** – zkontroluj `logs/tunnel.log`; může pomoci jiná síť nebo protokol `http2`.
+- **Procesy zůstaly běžet** – `./stop.sh` kontroluje binárku a skript procesu před odesláním signálu; cizí nebo znovu použité PID neukončí.
