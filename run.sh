@@ -71,7 +71,7 @@ for required in bin/ffmpeg bin/cloudflared; do
 done
 [[ -x bin/ffmpeg && -x bin/cloudflared ]] || die 'Po setupu chybí spustitelné binárky.'
 [[ "$(uname -m)" == x86_64 ]] || die 'Stažené binárky jsou určeny pro Linux x86_64.'
-bin/ffmpeg -hide_banner -encoders 2>/dev/null | grep -q 'libx264' || die 'FFmpeg neobsahuje encoder libx264.'
+bin/ffmpeg -hide_banner -encoders 2>/dev/null | grep -F 'libx264' >/dev/null || die 'FFmpeg neobsahuje encoder libx264.'
 
 rm -f stream/hls/*.ts stream/hls/*.m3u8
 STARTUP_OK=0
