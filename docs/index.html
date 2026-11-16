@@ -49,7 +49,7 @@
     a { color: inherit; }
     ::selection { background: rgba(143, 180, 255, .3); }
 
-    h1, h2, .kicker, .eyebrow, .countdown, .brand-caption, .nav-status, .launch-date {
+    h1, h2, .kicker, .eyebrow, .countdown, .brand-caption, .launch-date {
       font-family: 'Space Grotesk', 'Inter', sans-serif;
     }
 
@@ -123,7 +123,7 @@
       text-decoration: none;
       min-width: 0;
     }
-    .brand img { height: 30px; width: auto; flex-shrink: 0; }
+    .brand img { height: 42px; width: auto; flex-shrink: 0; }
     .brand-caption {
       font-size: .68rem;
       font-weight: 500;
@@ -134,23 +134,6 @@
       padding-left: .8rem;
       line-height: 1.2;
       white-space: nowrap;
-    }
-    .nav-status {
-      display: inline-flex;
-      align-items: center;
-      gap: .5rem;
-      font-size: .64rem;
-      letter-spacing: .18em;
-      text-transform: uppercase;
-      color: var(--body);
-      white-space: nowrap;
-    }
-    .nav-status .dot {
-      width: .45rem;
-      height: .45rem;
-      border-radius: 50%;
-      background: var(--ok);
-      box-shadow: 0 0 10px rgba(56, 211, 159, .8);
     }
     .nav-right {
       display: flex;
@@ -224,21 +207,6 @@
       display: grid;
       place-items: center;
       margin-bottom: clamp(1.1rem, 2.5vw, 1.7rem);
-    }
-    .patch-frame::before {
-      content: "";
-      position: absolute;
-      inset: -18%;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(143, 180, 255, .25), transparent 65%);
-      filter: blur(10px);
-    }
-    .patch-frame::after {
-      content: "";
-      position: absolute;
-      inset: -3%;
-      border-radius: 50%;
-      border: 1px solid rgba(143, 180, 255, .18);
     }
     .patch-frame img {
       position: relative;
@@ -501,6 +469,7 @@
     }
     @media (max-width: 560px) {
       :root { --nav-h: 58px; }
+      .brand img { height: 36px; }
       .brand-caption { display: none; }
       .nav-right { gap: .7rem; }
       .countdown .unit { margin-right: .4rem; }
@@ -527,7 +496,6 @@
     </a>
     <div class="nav-right">
       <a class="nav-link" href="rampa.html">Rampa</a>
-      <div class="nav-status"><span class="dot"></span><span id="nav-status-text">Go for launch</span></div>
     </div>
   </header>
 
@@ -537,7 +505,7 @@
         <div class="patch-frame">
           <img src="assets/mission-logo.png" alt="Cassiopeia I">
         </div>
-        <div class="eyebrow">Inaugural launch</div>
+        <div class="eyebrow">Launch</div>
         <h1>Cassiopeia <span>I</span></h1>
         <div class="subbrand">Mellotech</div>
 
@@ -581,7 +549,6 @@
     /* ---------------- countdown (T-d/h/m/s) ---------------- */
     const LAUNCH_DATE = new Date('2026-11-21T14:00:00+01:00');
     const countdownEl = document.getElementById('countdown');
-    const navStatusText = document.getElementById('nav-status-text');
     const pad2 = (n) => String(n).padStart(2, '0');
 
     function renderCountdown() {
@@ -605,7 +572,6 @@
       parts.push('<span class="num">' + pad2(seconds) + '</span><span class="unit">s</span>');
 
       countdownEl.innerHTML = parts.join('');
-      navStatusText.textContent = diff <= 0 ? 'Mission launched' : 'Go for launch';
     }
 
     renderCountdown();
