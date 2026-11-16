@@ -14,10 +14,10 @@ fi
 : "${VIDEO_DEVICE:=/dev/video0}"
 : "${VIDEO_SIZE:=1280x720}"
 : "${FRAMERATE:=30}"
-: "${GOP:=15}"
+: "${GOP:=18}"
 : "${BITRATE:=1500k}"
 : "${BUFSIZE:=3000k}"
-: "${HLS_TIME:=0.5}"
+: "${HLS_TIME:=0.6}"
 : "${HLS_LIST_SIZE:=6}"
 : "${PORT:=8080}"
 : "${GIT_BRANCH:=main}"
@@ -91,7 +91,7 @@ bin/ffmpeg -hide_banner -loglevel warning \
   -fflags nobuffer \
   -f v4l2 -framerate "$FRAMERATE" -video_size "$VIDEO_SIZE" -i "$VIDEO_DEVICE" \
   -an -c:v libx264 -preset veryfast -tune zerolatency -profile:v baseline -pix_fmt yuv420p \
-  -x264-params 'rc-lookahead=0:sync-lookahead=0:bframes=0:scენecut=0' \
+  -x264-params 'rc-lookahead=0:sync-lookahead=0:bframes=0:scenecut=0' \
   -g "$GOP" -keyint_min "$GOP" -sc_threshold 0 \
   -b:v "$BITRATE" -maxrate "$BITRATE" -bufsize "$BUFSIZE" \
   -force_key_frames "expr:gte(t,n_forced*$HLS_TIME)" \

@@ -70,6 +70,24 @@ Základní testy HLS serveru lze spustit bez dalších Python balíčků:
 python3 -m unittest discover -s stream -p 'test_*.py' -v
 ```
 
+## Landing page a odpočet
+
+Obsah stránky je v `docs/index.html`, loga v `docs/assets/`. Odpočet se řídí
+konstantou `LAUNCH_DATE`:
+
+```js
+const LAUNCH_DATE = new Date('2026-11-21T14:00:00+01:00');
+```
+
+Zobrazuje se postupně včetně sekund:
+`T-06d 01h 08m 42s` → `T-01h 08m 42s` → `T-08m 42s` → `T-42s`.
+
+### Mapa rampy
+
+`docs/rampa.html` zobrazuje satelitní pohled na místo rampy
+(49.196222, 15.771694) a odkazy do Google Maps. Na hlavní stránku je napojený
+v navigaci jako „Rampa“ a v liště přehrávače jako „Mapa rampy“.
+
 ## Konfigurace
 
 Uprav `config.env`:
@@ -79,10 +97,10 @@ Uprav `config.env`:
 | `VIDEO_DEVICE` | `/dev/video0` | kamera |
 | `VIDEO_SIZE` | `1280x720` | rozlišení |
 | `FRAMERATE` | `30` | FPS |
-| `GOP` | `15` | interval keyframů |
+| `GOP` | `18` | interval keyframů (odpovídá `HLS_TIME`) |
 | `BITRATE` | `1500k` | datový tok videa |
 | `BUFSIZE` | `3000k` | encoder buffer |
-| `HLS_TIME` | `0.5` | délka segmentu v sekundách |
+| `HLS_TIME` | `0.6` | délka segmentu v sekundách |
 | `HLS_LIST_SIZE` | `6` | počet segmentů v playlistu (min. 2) |
 | `PORT` | `8080` | lokální port HLS serveru |
 | `GIT_BRANCH` | `main` | větev pro publikování |
@@ -98,6 +116,7 @@ Uprav `config.env`:
 - Lokální HTTP server odmítá bind mimo loopback a zpřístupňuje jen playlist, očekávané HLS segmenty a `/health`. CORS je otevřené, protože veřejná GitHub Pages stránka načítá stream z jiné domény.
 - URL z `trycloudflare.com` je náhodná při každém spuštění. Pro stálou adresu použij Cloudflare Named Tunnel a vlastní doménu.
 - HLS + tunnel přidává přibližně 1–3 sekundy zpoždění. GitHub Pages může po změně `stream.json` potřebovat desítky sekund na rebuild.
+- Drž `HLS_TIME` alespoň `0.6` (a `GOP` na `FRAMERATE * HLS_TIME`). Kratší segmenty způsobí `#EXT-X-TARGETDURATION:0`, který někteří HLS přehrávače odmítnou.
 - `stop.sh` smaže lokální HLS segmenty a pokusí se vymazat publikovanou URL. Pokud push selže, stará URL zůstane na stránce, ale její tunnel je ukončen.
 
 ## Řešení problémů
