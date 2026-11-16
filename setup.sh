@@ -1,118 +1,106 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -Eeuo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT"
+umask 077
+
+log() { printf '[%s] %s\n' "$(date -u +%H:%M:%S)" "$*"; }
+die() { printf 'CHYBA: %s\n' "$*" >&2; exit 1; }
 
 DEPS_ONLY=0
 case "${1:-}" in
+  '') ;;
   --deps-only) DEPS_ONLY=1 ;;
+  *) die "Neznámý argument: $1 (použijte --deps-only)" ;;
 esac
 
-mkdir -p bin docs stream logs run
+[[ "$(uname -s)" == Linux && "$(uname -m)" == x86_64 ]] || die 'Setup podporuje pouze Linux x86_64.'
+for command in curl tar git python3; do
+  command -v "$command" >/dev/null 2>&1 || die "Chybí příkaz: $command"
+done
 
-if [ ! -x bin/ffmpeg ] || [ ! -x bin/ffprobe ]; then
-  echo "Stahuji statický ffmpeg..."
-  TMP="$(mktemp -d)"
-  curl -fSL -o "$TMP/ffmpeg.tar.xz" \
-    "https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz"
-  tar -xf "$TMP/ffmpeg.tar.xz" -C "$TMP"
-  cp "$TMP"/ffmpeg-*-static/ffmpeg "$TMP"/ffmpeg-*-static/ffprobe bin/
-  chmod +x bin/ffmpeg bin/ffprobe
-  rm -rf "$TMP"
-  echo "ffmpeg nainstalován do bin/."
+if [[ -f config.env ]]; then
+  # shellcheck disable=SC1091
+  source config.env
+fi
+: "${VIDEO_DEVICE:=/dev/video0}"
+: "${GIT_BRANCH:=main}"
+: "${REMOTE:=origin}"
+
+mkdir -p bin docs stream logs run
+TMP="$(mktemp -d)"
+cleanup() { rm -rf "$TMP"; }
+trap cleanup EXIT
+
+if [[ ! -x bin/ffmpeg || ! -x bin/ffprobe ]]; then
+  log 'Stahuji statický FFmpeg...'
+  curl --fail --location --show-error --silent --retry 3 --retry-all-errors --connect-timeout 15 --max-time 300 \
+    -o "$TMP/ffmpeg.tar.xz" 'https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz'
+  tar -xJf "$TMP/ffmpeg.tar.xz" -C "$TMP"
+  mapfile -t FFMPEG_DIRS < <(find "$TMP" -mindepth 1 -maxdepth 1 -type d -name 'ffmpeg-*-static' -print)
+  (( ${#FFMPEG_DIRS[@]} == 1 )) || die 'Stažený FFmpeg archiv nemá očekávanou strukturu.'
+  [[ -x "${FFMPEG_DIRS[0]}/ffmpeg" && -x "${FFMPEG_DIRS[0]}/ffprobe" ]] || die 'V archivu chybí ffmpeg nebo ffprobe.'
+  install -m 0755 "${FFMPEG_DIRS[0]}/ffmpeg" "$TMP/ffmpeg"
+  install -m 0755 "${FFMPEG_DIRS[0]}/ffprobe" "$TMP/ffprobe"
+  mv -f "$TMP/ffmpeg" bin/ffmpeg
+  mv -f "$TMP/ffprobe" bin/ffprobe
+  bin/ffmpeg -version >/dev/null
+  log 'FFmpeg nainstalován.'
 fi
 
-if [ ! -x bin/cloudflared ]; then
-  echo "Stahuji cloudflared..."
-  curl -fSL -o bin/cloudflared \
-    "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64"
-  chmod +x bin/cloudflared
-  echo "cloudflared nainstalován do bin/."
+if [[ ! -x bin/cloudflared ]]; then
+  log 'Stahuji cloudflared...'
+  curl --fail --location --show-error --silent --retry 3 --retry-all-errors --connect-timeout 15 --max-time 180 \
+    -o "$TMP/cloudflared" 'https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64'
+  [[ -s "$TMP/cloudflared" ]] || die 'Stažený cloudflared je prázdný.'
+  install -m 0755 "$TMP/cloudflared" "$TMP/cloudflared-ready"
+  "$TMP/cloudflared-ready" --version >/dev/null
+  mv -f "$TMP/cloudflared-ready" bin/cloudflared
+  log 'cloudflared nainstalován.'
 fi
 
 chmod +x run.sh stop.sh setup.sh
-
-if [ "$DEPS_ONLY" = 1 ]; then
+if (( DEPS_ONLY )); then
+  log 'Závislosti jsou připravené.'
   exit 0
 fi
 
-DEVICE="${VIDEO_DEVICE:-/dev/video0}"
-if [ ! -e "$DEVICE" ]; then
-  echo "Pozor: kamera $DEVICE neexistuje. Uprav VIDEO_DEVICE v config.env." >&2
+if [[ ! -e "$VIDEO_DEVICE" ]]; then
+  log "VAROVÁNÍ: kamera $VIDEO_DEVICE neexistuje; nastavte VIDEO_DEVICE v config.env."
+elif [[ ! -r "$VIDEO_DEVICE" ]]; then
+  die "Kamera $VIDEO_DEVICE není čitelná uživatelem $(id -un)."
 else
-  echo "Kamera nalezena: $DEVICE"
+  log "Kamera nalezena: $VIDEO_DEVICE"
 fi
 
-if [ ! -f docs/stream.json ]; then
-  printf '{\n  "url": "",\n  "updated": ""\n}\n' > docs/stream.json
+[[ "$GIT_BRANCH" =~ ^[A-Za-z0-9._/-]+$ ]] || die 'GIT_BRANCH obsahuje nepovolené znaky.'
+[[ "$REMOTE" =~ ^[A-Za-z0-9._-]+$ ]] || die 'REMOTE obsahuje nepovolené znaky.'
+if [[ ! -d .git ]]; then
+  git init -b "$GIT_BRANCH"
 fi
-
-if [ ! -d .git ]; then
-  git init -b main
+if ! git remote get-url "$REMOTE" >/dev/null 2>&1; then
+  if [[ "$REMOTE" != origin ]]; then die "Git remote $REMOTE neexistuje."; fi
+  git remote add origin 'https://github.com/simonbalog/launch.git'
 fi
-
-if ! git remote get-url origin >/dev/null 2>&1; then
-  git remote add origin "https://github.com/simonbalog/launch.git"
-fi
-
-git add -A
 if ! git diff --cached --quiet; then
-  git commit -m "Camera live stream via GitHub Pages and Cloudflare tunnel"
+  die 'Git index obsahuje staged změny; nejprve je commitněte nebo odstageujte.'
 fi
 
-echo "Nahrávám do GitHubu..."
-git push -u origin main
-
-TOKEN=""
-CRED="$(GIT_TERMINAL_PROMPT=0 timeout 10 bash -c "printf 'protocol=https\nhost=github.com\n\n' | git credential fill" 2>/dev/null || true)"
-if [ -n "$CRED" ]; then
-  TOKEN="$(printf '%s\n' "$CRED" | sed -n 's/^password=//p' | head -1)"
+# Stage only project files; never add downloaded binaries, PID files, logs,
+# camera captures, or arbitrary untracked files from the checkout.
+git add -A -- .gitignore README.md config.env run.sh setup.sh stop.sh stream docs
+if ! git diff --cached --quiet; then
+  git commit -m 'Camera live stream via GitHub Pages and Cloudflare tunnel'
 fi
+log "Pushuji větev $GIT_BRANCH na remote $REMOTE..."
+git push -u "$REMOTE" "HEAD:$GIT_BRANCH"
 
-PAGES_API="https://api.github.com/repos/simonbalog/launch/pages"
-if [ -n "$TOKEN" ]; then
-  BODY='{"source":{"branch":"main","path":"/docs"}}'
-  RESP="$(mktemp)"
-  CODE="$(curl -s -o "$RESP" -w '%{http_code}' \
-    -H "Authorization: Bearer $TOKEN" \
-    -H "Accept: application/vnd.github+json" \
-    -H "X-GitHub-Api-Version: 2022-11-28" \
-    "$PAGES_API" || echo 000)"
+cat <<EOF
 
-  if [ "$CODE" = "200" ]; then
-    CODE="$(curl -s -o "$RESP" -w '%{http_code}' -X PATCH \
-      -H "Authorization: Bearer $TOKEN" \
-      -H "Accept: application/vnd.github+json" \
-      -H "X-GitHub-Api-Version: 2022-11-28" \
-      -d "$BODY" "$PAGES_API" || echo 000)"
-  elif [ "$CODE" = "404" ]; then
-    CODE="$(curl -s -o "$RESP" -w '%{http_code}' -X POST \
-      -H "Authorization: Bearer $TOKEN" \
-      -H "Accept: application/vnd.github+json" \
-      -H "X-GitHub-Api-Version: 2022-11-28" \
-      -d "$BODY" "$PAGES_API" || echo 000)"
-  fi
-
-  case "$CODE" in
-    200|201|204)
-      echo "GitHub Pages povoleny (main /docs)."
-      ;;
-    403|404)
-      echo "GitHub Pages nejde zapnout automaticky (token bez opravnění pages:write)."
-      echo "Zapni je ručně: Settings > Pages > Deploy from a branch > main /docs."
-      ;;
-    *)
-      echo "GitHub Pages API vrátilo HTTP $CODE. Zkontroluj Settings > Pages."
-      ;;
-  esac
-  rm -f "$RESP"
-else
-  echo "Token pro GitHub nebyl nalezen. Zapni Pages ručně: Settings > Pages > main /docs."
-fi
-
-echo
-echo "Hotovo."
-echo "  Pages: https://simonbalog.github.io/launch/ (první build trvá ~1 min)"
-echo "  Start: ./run.sh"
-echo "  Stop:  ./stop.sh"
+Hotovo.
+  GitHub Pages zapněte v Settings → Pages → Deploy from a branch → $GIT_BRANCH /docs.
+  Pages: https://simonbalog.github.io/launch/
+  Start: ./run.sh
+  Stop:  ./stop.sh
+EOF
