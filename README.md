@@ -3,7 +3,8 @@
 # Cassiopeia I — Mellotech
 
 Launch stránka pro první start nosné rakety **Cassiopeia I** týmu **Mellotech**
-(21. 11. 2026, 14:00 CET) s živým přenosem z kamery.
+(21. 11. 2026, 14:00–14:15 CET; okno se může kvůli počasí mírně posunout)
+s živým přenosem z kamery.
 
 Projekt vezme obraz z webkamery tohoto počítače, zabalí ho do HLS a vystaví
 přes Cloudflare Quick Tunnel. GitHub Pages hostí pouze stránku s přehrávačem.
@@ -79,13 +80,16 @@ konstantou `LAUNCH_DATE`:
 const LAUNCH_DATE = new Date('2026-11-21T14:00:00+01:00');
 ```
 
+Cílem odpočtu je začátek startovního okna (14:00 CET).
+
 Zobrazuje se postupně včetně sekund:
 `T-06d 01h 08m 42s` → `T-01h 08m 42s` → `T-08m 42s` → `T-42s`.
 
 ### Mapa rampy
 
 `docs/rampa.html` zobrazuje satelitní pohled na místo rampy
-(49.196222, 15.771694) a odkazy do Google Maps. Na hlavní stránku je napojený
+(49°12'21.4"N 15°46'16.0"E, tj. 49.205949, 15.771099) a odkazy do Google Maps.
+Na hlavní stránku je napojený
 v navigaci jako „Rampa“ a v liště přehrávače jako „Mapa rampy“.
 
 ## Konfigurace

@@ -4,10 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Cassiopeia I — Mellotech</title>
-  <meta name="description" content="Cassiopeia I — Mellotech. Živý pohled na rampu a odpočet do startu 21. 11. 2026, 14:00 CET.">
+  <meta name="description" content="Cassiopeia I — Mellotech. Živý pohled na rampu a odpočet do startu 21. 11. 2026, 14:00–14:15 CET. Startovní okno se může kvůli počasí mírně posunout.">
   <meta name="theme-color" content="#04060a">
   <meta property="og:title" content="Cassiopeia I — Mellotech">
-  <meta property="og:description" content="Živý pohled na rampu a odpočet do startu. 21. 11. 2026, 14:00 CET.">
+  <meta property="og:description" content="Živý pohled na rampu a odpočet do startu. 21. 11. 2026, 14:00–14:15 CET. Startovní okno se může kvůli počasí mírně posunout.">
   <meta property="og:type" content="website">
   <meta property="og:image" content="https://simonbalog.github.io/launch/assets/mission-logo.png">
   <link rel="icon" href="assets/mission-logo.png">
@@ -293,6 +293,13 @@
       text-transform: uppercase;
       color: var(--body);
     }
+    .launch-window-note {
+      margin-top: .45rem;
+      font-size: .68rem;
+      letter-spacing: .04em;
+      line-height: 1.5;
+      color: var(--muted);
+    }
 
     /* right column — live */
     .hero-live { min-width: 0; }
@@ -510,10 +517,11 @@
         <div class="subbrand">Mellotech</div>
 
         <div class="countdown-wrap">
-          <div class="countdown-label">Odpočet do startu</div>
+          <div class="countdown-label">Odpočet do startovního okna</div>
           <div class="countdown" id="countdown" aria-live="off">T-00s</div>
         </div>
-        <div class="launch-date">21. 11. 2026 · 14:00 CET</div>
+        <div class="launch-date">21. 11. 2026 · 14:00–14:15 CET</div>
+        <div class="launch-window-note">Startovní okno se může kvůli počasí mírně posunout.</div>
       </div>
 
       <div class="hero-live">
